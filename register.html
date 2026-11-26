@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register | CampSlot</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo"><span>CampSlot</span></div>
+      <nav><a href="index.html">Home</a><a href="login.html">Login</a></nav>
+    </header>
+    <div class="login-container">
+      <div class="login-box">
+        <h1>Create Account</h1>
+        <div id="flash-box"></div>
+        <form id="reg-form">
+          <label>Full Name</label><input type="text" id="name" required />
+          <label>Email</label><input type="email" id="email" required />
+          <label>Password</label
+          ><input type="password" id="password" required /> <label>Role</label
+          ><select id="role">
+            <option value="student">Student</option>
+            <option value="faculty">Faculty</option>
+          </select>
+          <div id="stu-box">
+            <label>Section</label
+            ><input type="text" id="section" placeholder="K4P26BH" />
+          </div>
+          <label>Department</label
+          ><input
+            type="text"
+            id="dept"
+            placeholder="Computer Science"
+            required
+          />
+          <button type="submit" class="login-submit">Register</button>
+        </form>
+      </div>
+    </div>
+    <footer>
+      <p>© 2026 CampSlot | Campus Room Availability System (CSE326)</p>
+    </footer>
+    <script src="js/app.js"></script>
+    <script>
+      document.getElementById("role").addEventListener("change", function () {
+        document.getElementById("stu-box").style.display =
+          this.value === "student" ? "block" : "none";
+      });
+      document.getElementById("reg-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const db = getDB();
+        const email = document
+          .getElementById("email")
+          .value.trim()
+          .toLowerCase();
+        if (db.users.some((u) => u.email.toLowerCase() === email)) {
+          showFlash("Email already exists.", "error");
+          return;
+        }
+        const role = document.getElementById("role").value;
+        db.users.push({
+          id: Date.now(),
+          name: document.getElementById("name").value.trim(),
+          email,
+          password: document.getElementById("password").value,
+          role,
+          section:
+            role === "student"
+              ? document.getElementById("section").value.toUpperCase()
+              : "",
+          department: document.getElementById("dept").value,
+          status: "approved",
+        });
+        saveDB(db);
+        showFlash("Registered! Redirecting...");
+        setTimeout(() => (location.href = "login.html"), 1000);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Rooms | CampSlot</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo"><span>CampSlot</span></div>
+      <nav>
+        <a href="admin_dashboard.html">Dashboard</a
+        ><a
+          href="#"
+          onclick="
+            logout();
+            return false;
+          "
+          >Logout</a
+        >
+      </nav>
+    </header>
+    <main class="admin-page">
+      <div id="flash-box"></div>
+      <div class="page-heading">
+        <div>
+          <h1>Room Catalogue</h1>
+          <p>Manage classrooms, labs, and seminar halls.</p>
+        </div>
+        <a href="admin_dashboard.html" class="back-button">← Dashboard</a>
+      </div>
+      <div class="management-layout">
+        <section class="management-form">
+          <h2>Add Room</h2>
+          <form id="r-form">
+            <div class="form-group">
+              <label>Room Number</label
+              ><input type="text" id="r-num" required />
+            </div>
+            <div class="form-group">
+              <label>Block</label
+              ><select id="r-blk" required></select>
+            </div>
+            <div class="form-group">
+              <label>Capacity</label
+              ><input type="number" id="r-cap" min="1" required />
+            </div>
+            <div class="form-group">
+              <label>Type</label
+              ><select id="r-type">
+                <option>Classroom</option>
+                <option>Computer Lab</option>
+                <option>Seminar Hall</option>
+                <option>Lecture Hall</option>
+              </select>
+            </div>
+            <button type="submit" class="management-button">+ Add Room</button>
+          </form>
+        </section>
+        <section class="management-list">
+          <h2>Registered Rooms</h2>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Room</th>
+                  <th>Block</th>
+                  <th>Capacity</th>
+                  <th>Type</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="r-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <p>© 2026 CampSlot | Campus Room Availability System (CSE326)</p>
+    </footer>
+    <script src="js/app.js"></script>
+    <script>
+      requireAuth("admin");
+      function render() {
+        const db = getDB();
+        document.getElementById("r-blk").innerHTML = db.blocks
+          .map(
+            (b) =>
+              `<option value="${b.id}">${b.building_number} - ${b.block_name}</option>`,
+          )
+          .join("");
+        document.getElementById("r-tbody").innerHTML = db.rooms
+          .map((r) => {
+            const b = db.blocks.find((x) => x.id === r.block_id);
+            return `<tr><td><strong>${r.room_number}</strong></td><td>${b ? b.block_name : "-"}</td><td>${r.capacity}</td><td>${r.room_type}</td><td><button class="delete-button" onclick="delR(${r.id})">Delete</button></td></tr>`;
+          })
+          .join("");
+      }
+      window.delR = (id) => {
+        const db = getDB();
+        db.rooms = db.rooms.filter((x) => x.id !== id);
+        saveDB(db);
+        render();
+        showFlash("Room deleted.");
+      };
+      document.getElementById("r-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const db = getDB();
+        db.rooms.push({
+          id: Date.now(),
+          room_number: document.getElementById("r-num").value,
+          block_id: Number(document.getElementById("r-blk").value),
+          capacity: Number(document.getElementById("r-cap").value),
+          room_type: document.getElementById("r-type").value,
+        });
+        saveDB(db);
+        e.target.reset();
+        render();
+        showFlash("Room added!");
+      });
+      render();
+    </script>
+  </body>
+</html>

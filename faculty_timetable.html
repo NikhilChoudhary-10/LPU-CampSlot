@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Faculty Timetable | CampSlot</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo"><span>CampSlot</span></div>
+      <nav>
+        <a href="faculty_dashboard.html">Dashboard</a
+        ><a
+          href="#"
+          onclick="
+            logout();
+            return false;
+          "
+          >Logout</a
+        >
+      </nav>
+    </header>
+    <main class="admin-page">
+      <div class="page-heading">
+        <div><h1>Teaching Timetable</h1></div>
+        <a href="faculty_dashboard.html" class="back-button">← Dashboard</a>
+      </div>
+      <div class="management-list">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Section</th>
+                <th>Subject</th>
+                <th>Room</th>
+              </tr>
+            </thead>
+            <tbody id="ft"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <p>© 2026 CampSlot | Campus Room Availability System (CSE326)</p>
+    </footer>
+    <script src="js/app.js"></script>
+    <script>
+      const u = requireAuth("faculty"),
+        db = getDB();
+      document.getElementById("ft").innerHTML = db.schedule
+        .filter((s) => s.faculty_id === u.id)
+        .map((s) => {
+          const r = db.rooms.find((x) => x.id === s.room_id);
+          return `<tr><td><strong>${s.day}</strong></td><td>${s.start_time}-${s.end_time}</td><td>${s.section}</td><td>${s.subject}</td><td>${r ? r.room_number : "-"}</td></tr>`;
+        })
+        .join("");
+    </script>
+  </body>
+</html>

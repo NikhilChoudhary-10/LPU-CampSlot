@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Blocks | CampSlot</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo"><span>CampSlot</span></div>
+      <nav>
+        <a href="admin_dashboard.html">Dashboard</a
+        ><a
+          href="#"
+          onclick="
+            logout();
+            return false;
+          "
+          >Logout</a
+        >
+      </nav>
+    </header>
+    <main class="building-page">
+      <div id="flash-box"></div>
+      <div class="building-heading">
+        <div>
+          <h1>Academic Buildings</h1>
+          <p>Add and manage university blocks.</p>
+        </div>
+        <a href="admin_dashboard.html" class="back-button">← Dashboard</a>
+      </div>
+      <div class="building-layout">
+        <section class="building-form-card">
+          <h2>Add Building</h2>
+          <form id="b-form">
+            <div class="form-group">
+              <label>Block Number</label
+              ><input type="text" id="b-num" required />
+            </div>
+            <div class="form-group">
+              <label>Block Name</label
+              ><input type="text" id="b-name" required />
+            </div>
+            <div class="form-group">
+              <label>Description</label
+              ><textarea id="b-desc" rows="3"></textarea>
+            </div>
+            <button type="submit" class="building-submit">
+              + Add Building
+            </button>
+          </form>
+        </section>
+        <section class="building-list-card">
+          <h2>Registered Buildings</h2>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="b-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <p>© 2026 CampSlot | Campus Room Availability System (CSE326)</p>
+    </footer>
+    <script src="js/app.js"></script>
+    <script>
+      requireAuth("admin");
+      function render() {
+        document.getElementById("b-tbody").innerHTML = getDB()
+          .blocks.map(
+            (b) =>
+              `<tr><td><strong>${b.building_number}</strong></td><td>${b.block_name}</td><td>${b.description || "-"}</td><td><button class="delete-button" onclick="delB(${b.id})">Delete</button></td></tr>`,
+          )
+          .join("");
+      }
+      window.delB = (id) => {
+        const db = getDB();
+        db.blocks = db.blocks.filter((x) => x.id !== id);
+        saveDB(db);
+        render();
+        showFlash("Deleted.");
+      };
+      document.getElementById("b-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const db = getDB();
+        db.blocks.push({
+          id: Date.now(),
+          building_number: document.getElementById("b-num").value,
+          block_name: document.getElementById("b-name").value,
+          description: document.getElementById("b-desc").value,
+        });
+        saveDB(db);
+        e.target.reset();
+        render();
+        showFlash("Building added!");
+      });
+      render();
+    </script>
+  </body>
+</html>

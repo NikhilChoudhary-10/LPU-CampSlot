@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Timetable | CampSlot</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo"><span>CampSlot</span></div>
+      <nav>
+        <a href="admin_dashboard.html">Dashboard</a
+        ><a
+          href="#"
+          onclick="
+            logout();
+            return false;
+          "
+          >Logout</a
+        >
+      </nav>
+    </header>
+    <main class="admin-page">
+      <div id="flash-box"></div>
+      <div class="page-heading">
+        <div><h1>Master Timetable</h1></div>
+        <a href="admin_dashboard.html" class="back-button">← Dashboard</a>
+      </div>
+      <div class="management-layout">
+        <section class="management-form">
+          <h2>Add Class</h2>
+          <form id="s-form">
+            <div class="form-group">
+              <label>Section</label
+              ><input type="text" id="s-sec" placeholder="K4P26BH" required />
+            </div>
+            <div class="form-group">
+              <label>Subject</label><input type="text" id="s-sub" required />
+            </div>
+            <div class="form-group">
+              <label>Day</label
+              ><select id="s-day">
+                <option>Monday</option>
+                <option>Tuesday</option>
+                <option>Wednesday</option>
+                <option>Thursday</option>
+                <option>Friday</option>
+                <option>Saturday</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Faculty</label
+              ><select id="s-fac"></select>
+            </div>
+            <div class="form-group">
+              <label>Room</label
+              ><select id="s-rm"></select>
+            </div>
+            <div class="form-group">
+              <label>Start</label><input type="time" id="s-st" required />
+            </div>
+            <div class="form-group">
+              <label>End</label><input type="time" id="s-en" required />
+            </div>
+            <button type="submit" class="management-button">+ Add Class</button>
+          </form>
+        </section>
+        <section class="management-list">
+          <h2>Timetable Entries</h2>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Day</th>
+                  <th>Time</th>
+                  <th>Section</th>
+                  <th>Subject</th>
+                  <th>Room</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="s-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <p>© 2026 CampSlot | Campus Room Availability System (CSE326)</p>
+    </footer>
+    <script src="js/app.js"></script>
+    <script>
+      requireAuth("admin");
+      function render() {
+        const db = getDB();
+        document.getElementById("s-fac").innerHTML = db.users
+          .filter((u) => u.role === "faculty")
+          .map((f) => `<option value="${f.id}">${f.name}</option>`)
+          .join("");
+        document.getElementById("s-rm").innerHTML = db.rooms
+          .map((r) => `<option value="${r.id}">${r.room_number}</option>`)
+          .join("");
+        document.getElementById("s-tbody").innerHTML = db.schedule
+          .map((s) => {
+            const r = db.rooms.find((x) => x.id === s.room_id);
+            return `<tr><td>${s.day}</td><td>${s.start_time}-${s.end_time}</td><td><strong>${s.section}</strong></td><td>${s.subject}</td><td>${r ? r.room_number : "-"}</td><td><button class="delete-button" onclick="delS(${s.id})">Delete</button></td></tr>`;
+          })
+          .join("");
+      }
+      window.delS = (id) => {
+        const db = getDB();
+        db.schedule = db.schedule.filter((x) => x.id !== id);
+        saveDB(db);
+        render();
+      };
+      document.getElementById("s-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const db = getDB();
+        db.schedule.push({
+          id: Date.now(),
+          section: document.getElementById("s-sec").value.toUpperCase(),
+          subject: document.getElementById("s-sub").value,
+          day: document.getElementById("s-day").value,
+          faculty_id: Number(document.getElementById("s-fac").value),
+          room_id: Number(document.getElementById("s-rm").value),
+          start_time: document.getElementById("s-st").value,
+          end_time: document.getElementById("s-en").value,
+        });
+        saveDB(db);
+        e.target.reset();
+        render();
+        showFlash("Class scheduled!");
+      });
+      render();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Booking Requests | CampSlot</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo"><span>CampSlot</span></div>
+      <nav>
+        <a href="admin_dashboard.html">Dashboard</a
+        ><a
+          href="#"
+          onclick="
+            logout();
+            return false;
+          "
+          >Logout</a
+        >
+      </nav>
+    </header>
+    <main class="admin-page">
+      <div id="flash-box"></div>
+      <div class="page-heading">
+        <div><h1>Booking Requests & Approval</h1></div>
+        <a href="admin_dashboard.html" class="back-button">← Dashboard</a>
+      </div>
+      <div class="management-list">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Faculty</th>
+                <th>Room</th>
+                <th>Date & Time</th>
+                <th>Purpose</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="req-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <p>© 2026 CampSlot | Campus Room Availability System (CSE326)</p>
+    </footer>
+    <script src="js/app.js"></script>
+    <script>
+      requireAuth("admin");
+      function render() {
+        const db = getDB();
+        document.getElementById("req-tbody").innerHTML = db.bookings
+          .slice()
+          .reverse()
+          .map((b) => {
+            const u = db.users.find((x) => x.id === b.user_id);
+            const r = db.rooms.find((x) => x.id === b.room_id);
+            const cls =
+              b.status === "Approved"
+                ? "badge-approved"
+                : b.status === "Rejected"
+                  ? "badge-rejected"
+                  : "badge-pending";
+            const act =
+              b.status === "Pending"
+                ? `<button class="btn-sm btn-approve" onclick="setSt(${b.id},'Approved')">Approve</button> <button class="btn-sm btn-reject" onclick="setSt(${b.id},'Rejected')">Reject</button>`
+                : "Reviewed";
+            return `<tr><td>${u ? u.name : "Faculty"}</td><td><strong>${r ? r.room_number : "Room"}</strong></td><td>${b.booking_date} (${b.start_time}-${b.end_time})</td><td>${b.purpose}</td><td><span class="badge ${cls}">${b.status}</span></td><td>${act}</td></tr>`;
+          })
+          .join("");
+      }
+      window.setSt = (id, st) => {
+        const db = getDB();
+        const item = db.bookings.find((x) => x.id === id);
+        if (item) item.status = st;
+        saveDB(db);
+        render();
+        showFlash("Marked " + st);
+      };
+      render();
+    </script>
+  </body>
+</html>

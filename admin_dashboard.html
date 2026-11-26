@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard | CampSlot</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo"><span>CampSlot</span></div>
+      <nav>
+        <a href="admin_dashboard.html">Dashboard</a
+        ><a
+          href="#"
+          onclick="
+            logout();
+            return false;
+          "
+          >Logout</a
+        >
+      </nav>
+    </header>
+    <main class="dashboard-container">
+      <div class="admin-heading">
+        <h1>Administrator Dashboard</h1>
+        <p id="welcome-msg"></p>
+      </div>
+      <div class="dashboard-grid">
+        <div class="dashboard-card">
+          <div class="admin-card-icon">🏢</div>
+          <h3>Manage Blocks</h3>
+          <p id="s-blk"></p>
+          <a href="admin_blocks.html" class="admin-action">Manage Blocks →</a>
+        </div>
+        <div class="dashboard-card">
+          <div class="admin-card-icon">🚪</div>
+          <h3>Room Catalogue</h3>
+          <p id="s-rm"></p>
+          <a href="admin_rooms.html" class="admin-action">Manage Rooms →</a>
+        </div>
+        <div class="dashboard-card">
+          <div class="admin-card-icon">📋</div>
+          <h3>Booking Approvals</h3>
+          <p id="s-bk"></p>
+          <a href="booking_requests.html" class="admin-action"
+            >Review Requests →</a
+          >
+        </div>
+        <div class="dashboard-card">
+          <div class="admin-card-icon">🗓️</div>
+          <h3>Manage Timetable</h3>
+          <p id="s-sc"></p>
+          <a href="admin_schedule.html" class="admin-action"
+            >Manage Timetable →</a
+          >
+        </div>
+        <div class="dashboard-card">
+          <div class="admin-card-icon">👥</div>
+          <h3>Manage Users</h3>
+          <p id="s-us"></p>
+          <a href="admin_users.html" class="admin-action">Manage Users →</a>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <p>© 2026 CampSlot | Campus Room Availability System (CSE326)</p>
+    </footer>
+    <script src="js/app.js"></script>
+    <script>
+      const u = requireAuth("admin");
+      if (u) {
+        const db = getDB();
+        document.getElementById("welcome-msg").textContent =
+          `Welcome, ${u.name}!`;
+        document.getElementById("s-blk").textContent =
+          `${db.blocks.length} academic buildings.`;
+        document.getElementById("s-rm").textContent =
+          `${db.rooms.length} classrooms, labs & halls.`;
+        document.getElementById("s-bk").textContent =
+          `${db.bookings.filter((b) => b.status === "Pending").length} pending requests.`;
+        document.getElementById("s-sc").textContent =
+          `${db.schedule.length} scheduled classes.`;
+        document.getElementById("s-us").textContent =
+          `${db.users.length} registered users.`;
+      }
+    </script>
+  </body>
+</html>
