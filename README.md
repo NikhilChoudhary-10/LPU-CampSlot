@@ -1,4 +1,4 @@
-# CampSlot � Campus Room Availability System
+# CampSlot Campus Room Availability System
 
 A client-side web application built using **HTML5, CSS3, and JavaScript (localStorage)** for **CSE326: Internet Programming**.
 
